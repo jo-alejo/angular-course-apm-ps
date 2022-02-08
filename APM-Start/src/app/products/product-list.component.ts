@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { IProduct } from './product';
 
 @Component({
@@ -81,5 +81,10 @@ export class ProductListComponent implements OnInit {
         filterBy = filterBy.toLocaleLowerCase();
         return this.products.filter((product: IProduct) =>
             product.productName.toLocaleLowerCase().includes(filterBy))
+    }
+
+
+    onRatingClicked(message: string): void {
+        this.pageTitle = "Product List: " + message;
     }
 }
