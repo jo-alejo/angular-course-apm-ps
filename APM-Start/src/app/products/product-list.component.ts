@@ -1,6 +1,7 @@
 import { ProductService } from './product.service';
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, OnDestroy, OnInit, } from '@angular/core';
 import { IProduct } from './product';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'pm-products',
@@ -8,18 +9,18 @@ import { IProduct } from './product';
     styleUrls: ['./product-list.component.css']
 })
 
-export class ProductListComponent implements OnInit {
+export class ProductListComponent implements OnInit, OnDestroy {
     pageTitle: string = 'My Product List';
     imageWidth: number = 50;
     imageMargin: number = 2;
     showImage: boolean = false;
+    errorMessage: string = '';
+    sub!: Subscription;
 
     private _listFilter: string = '';
-
     get listFilter(): string {
         return this._listFilter;
     }
-
     set listFilter(value: string) {
         this._listFilter = value;
         console.log('In setter: ', value);
@@ -37,9 +38,19 @@ export class ProductListComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.products = this.productService.getProducts();
-        this.filteredProducts = this.products;
+        this.sub = this.productService.getProducts().subscribe({
+            next: products => {
+                this.products = products;
+                this.filteredProducts = this.products;
+            },
+            error: err => this.errorMessage = err
+        });
     }
+
+    ngOnDestroy(): void {
+        this.sub.unsubscribe();
+    }
+
 
     performFilter(filterBy: string): IProduct[] {
         filterBy = filterBy.toLocaleLowerCase();
@@ -49,6 +60,6 @@ export class ProductListComponent implements OnInit {
 
 
     onRatingClicked(message: string): void {
-        this.pageTitle = "Product List: " + message;
+        this.pageTitle = 'Product List: ' + message;
     }
 }
